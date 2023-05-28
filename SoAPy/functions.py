@@ -64,9 +64,18 @@ def set_options(spectroscopy, shell_type, functional, basis_set, distance_thresh
                             dir_list.append(cwd + '/' + dir_name)
                             relative_dir_list.append(dir_name)
                             dir_parameters.append(parameter_list)
+    #for g in range(len(dir_list)):
+        #os.makedirs(f"{dir_list[g]}")
+    return dir_list, dir_parameters, relative_dir_list
+
+
+
+def make_directories(dir_list):
+    """
+    Creates the directories for input generation.
+    """
     for g in range(len(dir_list)):
         os.makedirs(f"{dir_list[g]}")
-    return dir_list, dir_parameters, relative_dir_list
 
 
 
@@ -603,7 +612,84 @@ def generate_batch_submission_script(relative_dir_list, dir_parameters):
 
 
 
-#def collect_data(dir_list, dir_parameters):
+def collect_data(cwd, dir_list, dir_parameters):
+    """
+    Collects the data from the Gaussian output files for spectral generation.
+    """
+    # Change to test specific directory.
+    for a in range(len(dir_list)):
+        print("____________________________")
+        print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
+        with open(f"{cwd}/output_data.txt", "a") as file:
+            file.write(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}\n")
+
+        # Obtain data from each conformer in the test.
+        conformer_count = 1 
+        while conformer_count <= int(dir_parameters[a][5]):
+            print(f"Snapshot: {conformer_count}")
+            frequency = []
+            intensity = []
+            os.chdir(f"{dir_list[a]}/cmpd_{conformer_count}")
+
+            with open("output.log", "r") as file_out:
+                for line in file_out:
+                    split_line = line.split()
+                    if len(split_line) > 7:
+                        if split_line[0] == "Sum" and split_line[2] == "electronic" and split_line[6] == "Energies=":
+                            delta_G = split_line[-1]
+                    if len(split_line) > 2:
+                        if split_line[2] == "imaginary":
+                            num_imaginary_frequencies = int(split_line[1])
+                        if split_line[0] == "NAtoms=":
+                            natom = int(split_line[1])
+                        if split_line[0] == "Frequencies":
+                            frequency.extend(map(float, split_line[2:]))
+                        if dir_parameters[a][0] == "VCD":
+                            if split_line[0] == "Rot.":
+                                intensity.extend(map(float, split_line[3:]))
+                        elif dir_parameters[a][0] == "ROA":
+                            if split_line[0] == "CID3":
+                                intensity.extend(map(float, split_line[3:]))
+
+            # Calculate total number of vibrations for nonlinear molecules.
+            num_vibrations = 3 * natom - 6
+
+            # Confirming that all vibrational frequencies have obtained from the Gaussian output file. This is required since some of the imaginary frequencies result in line splits that don't separate correctly.
+            if len(frequency) == len(intensity) and len(frequency) == num_vibrations:
+                print("No discrepancies between frequencies and intensities obtained from output.")
+            else:
+                print("Discrepancy between the frequncies, intensities, and number of vibrations.")
+            # The possible discrepancy between line splits and the number of vibrational frequencies can be eliminated by removing the imaginary frequencies which we choose to do regardless of whether the descrepancy exists or not.
+            real_frequencies = []
+            real_intensities = []
+            num_real_vibrations = num_vibrations - num_imaginary_frequencies
+            j = num_vibrations - 1
+            while j > num_imaginary_frequencies - 1:
+                real_frequencies.append(frequency[j])
+                real_intensities.append(intensity[j])
+                j -= 1
+
+            print(f"GFE = {delta_G} \t Number of Atoms = {natom} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}")
+
+            # Print frequencies and intensities to output file.
+            with open(f"{cwd}/output_data.txt", "a") as file:
+                file.write(f"Snapshot = {conformer_count} \t GFE = {delta_G} \t Number of Atoms = {natom} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}\n")
+                for i in range(num_real_vibrations):
+                    file.write("{:.6f} \t \t {:.6f}\n".format(real_frequencies[i], real_intensities[i]))
+
+            conformer_count += 1
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
