@@ -733,12 +733,14 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
         if dir_parameters[a][0] == 'VCD':
             for b in range(len(frequency_axis)):
                 for c in range(len(spec_frequencies)):
-                    intensity_axis[b] += (1/((2.296*10**(-39))*np.sqrt(np.pi)*fwhm))*spec_frequencies_eV[c]*normalized_spec_intensities[c]*np.exp(-((frequency_axis_eV[b]-spec_frequencies_eV[c])/fwhm)**2)        
+                    intensity_axis[b] += (1/((2.296*10**(-39))*np.sqrt(np.pi)*fwhm))*spec_frequencies_eV[c]*normalized_spec_intensities[c]*np.exp(-((frequency_axis_eV[b]-spec_frequencies_eV[c])/fwhm)**2)
         # Calculating the Lorentzian-fit circular intensity difference from equation 5 and 6 in "Simulation of Raman and Raman optical activity of saccharides in solution" by Palivec et al.
         if dir_parameters[a][0] == 'ROA':
             for b in range(len(frequency_axis)):
                 for c in range(len(spec_frequencies)):
                     intensity_axis[b] += normalized_spec_intensities[c]*(2/np.pi)*(fwhm/(4*(frequency_axis_eV[b]-spec_frequencies_eV[c])**2+fwhm**2))
+
+        # NEED TO CHECK UNITS FOR BOTH OF THESE EQUATIONS. THIS INCLUDES UNITS ON FWHM.
 
         dir_frequency_axis.append(frequency_axis)
         dir_intensity_axis.append(intensity_axis)        
