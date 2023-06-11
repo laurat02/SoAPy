@@ -7,6 +7,10 @@ import os
 import shutil
 import math
 import requests
+import matplotlib as mpl
+from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
+
 #import pandas as pd
 
 
@@ -64,8 +68,6 @@ def set_options(spectroscopy, shell_type, functional, basis_set, distance_thresh
                             dir_list.append(cwd + '/' + dir_name)
                             relative_dir_list.append(dir_name)
                             dir_parameters.append(parameter_list)
-    #for g in range(len(dir_list)):
-        #os.makedirs(f"{dir_list[g]}")
     return dir_list, dir_parameters, relative_dir_list
 
 
@@ -616,12 +618,19 @@ def collect_data(cwd, dir_list, dir_parameters):
     """
     Collects the data from the Gaussian output files for spectral generation.
     """
+    # Initialize directory level arrays.
+    dir_frequencies = []
+    dir_intensities = []
+
     # Change to test specific directory.
     for a in range(len(dir_list)):
         print("____________________________")
         print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
         with open(f"{cwd}/output_data.txt", "a") as file:
             file.write(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}\n")
+
+        test_frequencies = []
+        test_intensities = []
 
         # Obtain data from each conformer in the test.
         conformer_count = 1 
@@ -675,9 +684,68 @@ def collect_data(cwd, dir_list, dir_parameters):
             with open(f"{cwd}/output_data.txt", "a") as file:
                 file.write(f"Snapshot = {conformer_count} \t GFE = {delta_G} \t Number of Atoms = {natom} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}\n")
                 for i in range(num_real_vibrations):
-                    file.write("{:.6f} \t \t {:.6f}\n".format(real_frequencies[i], real_intensities[i]))
+                    file.write("{:.4f} \t {:.4f}\n".format(real_frequencies[i], real_intensities[i]))
+            test_frequencies.extend(real_frequencies)
+            test_intensities.extend(real_intensities)
 
-            conformer_count += 1
+            conformer_count += 1    
+
+        dir_frequencies.append(test_frequencies)
+        dir_intensities.append(test_intensities)
+
+    return dir_frequencies, dir_intensities
+
+
+
+def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities):
+    """
+    Generates the spectrum for each test. The spectral generation uses a simple averaging algorithm to weight the snapshots.
+    """
+    # Initialize directory level arrays for plotting.
+    dir_frequency_axis = []
+    dir_intensity_axis = []
+
+    for a in range(len(dir_list)):
+        # Sorts the frequencies and intensities for a given test in ascending order of frequencies.
+        spec_frequencies, spec_intensities = zip(*sorted(zip(dir_frequencies[a], dir_intensities[a])))
+
+        # Define the interval at which points will be plotted for the x-coordinate.
+        delta = float((max(spec_frequencies)-min(spec_frequencies))/number_of_points)
+        
+        # Compute the "spec_frequencies" array in electron volts (eV).
+        spec_frequencies_eV = np.zeros_like(spec_frequencies)
+        for i in range(len(spec_frequencies)):
+            spec_frequencies_eV[i] = spec_frequencies[i]/8065.54429
+
+        # Obtain the values associated with the x-coordinates in cm-1 and eV.        
+        frequency_axis = np.arange(min(spec_frequencies), max(spec_frequencies), delta)
+        frequency_axis_eV = frequency_axis/8065.54429
+
+        # Initialize the array associated with the y-coordinates.
+        intensity_axis = np.zeros_like(frequency_axis)
+
+        # Normalize the intensity values based on the number of snapshots.
+        normalized_spec_intensities = np.zeros_like(spec_intensities)
+        for j in range(len(spec_intensities)):
+            normalized_spec_intensities[j] = spec_intensities[j]*(1/int(dir_parameters[a][5]))
+
+        # Calculating the differential molar extinction coefficient in equation 8d in "ECD Cotton Effects Approximated by the Gaussian Curve and Other Methods" by Philip J. Stephens and Nobuyuki Harada.
+        if dir_parameters[a][0] == 'VCD':
+            for b in range(len(frequency_axis)):
+                for c in range(len(spec_frequencies)):
+                    intensity_axis[b] += (1/((2.296*10**(-39))*np.sqrt(np.pi)*fwhm))*spec_frequencies_eV[c]*normalized_spec_intensities[c]*np.exp(-((frequency_axis_eV[b]-spec_frequencies_eV[c])/fwhm)**2)        
+        # Calculating the Lorentzian-fit circular intensity difference from equation 5 and 6 in "Simulation of Raman and Raman optical activity of saccharides in solution" by Palivec et al.
+        if dir_parameters[a][0] == 'ROA':
+            for b in range(len(frequency_axis)):
+                for c in range(len(spec_frequencies)):
+                    intensity_axis[b] += normalized_spec_intensities[c]*(2/np.pi)*(fwhm/(4*(frequency_axis_eV[b]-spec_frequencies_eV[c])**2+fwhm**2))
+
+        dir_frequency_axis.append(frequency_axis)
+        dir_intensity_axis.append(intensity_axis)        
+
+    return dir_frequency_axis, dir_intensity_axis
+
+
 
 
 
