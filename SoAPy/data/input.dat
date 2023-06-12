@@ -1,4 +1,4 @@
-%Mem=64GB
+%Mem=45GB
 %NProcShared=16
 %chk=MOLECULE_NAME_CONFORMER_NUMBER.chk
 #P FUNCTIONAL/BASIS_SET Int=UltraFine SCRF=(PCM, Solvent=Water) SCF(MaxCycle=512) Freq=SPECTROSCOPY
