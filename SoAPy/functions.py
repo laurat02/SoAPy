@@ -322,9 +322,12 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
             with open(f"{dir_list[a]}/cmpd_{conformer_count}/G09_sub_SLURM.sh", "r+") as file:
                 content = file.read()
                 if len(dir_parameters[a][3]) != 2:
-                    content = content.replace("MOLECULE_NAME_CONFORMER_NUMBER", f"{molecule_name}_cmpd_{conformer_count}_{dir_parameters[a][0]}_{dir_parameters[a][1]}_shell_{dir_parameters[a][2]}_{dir_parameters[a][3]}_{dir_parameters[a][4]}_{dir_parameters[a][5]}")
+                    basis = dir_parameters[a][3].replace(" ", "")
+                    content = content.replace("MOLECULE_NAME_CONFORMER_NUMBER", f"{molecule_name}_cmpd_{conformer_count}_{dir_parameters[a][0]}_{dir_parameters[a][1]}_shell_{dir_parameters[a][2]}_{basis}_{dir_parameters[a][4]}_{dir_parameters[a][5]}")
                 elif len(dir_parameters[a][3]) == 2:
-                    content = content.replace("MOLECULE_NAME_CONFORMER_NUMBER", f"{molecule_name}_cmpd_{conformer_count}_{dir_parameters[a][0]}_{dir_parameters[a][1]}_shell_{dir_parameters[a][2]}_{dir_parameters[a][3][0]}_{dir_parameters[a][3][1]}_{dir_parameters[a][4]}_{dir_parameters[a][5]}")
+                    basis0 = dir_parameters[a][3][0].replace(" ", "")
+                    basis1 = dir_parameters[a][3][1].replace(" ", "")
+                    content = content.replace("MOLECULE_NAME_CONFORMER_NUMBER", f"{molecule_name}_cmpd_{conformer_count}_{dir_parameters[a][0]}_{dir_parameters[a][1]}_shell_{dir_parameters[a][2]}_{basis0}_{basis1}_{dir_parameters[a][4]}_{dir_parameters[a][5]}")
                 file.seek(0)
                 file.write(content)
                 file.truncate()
