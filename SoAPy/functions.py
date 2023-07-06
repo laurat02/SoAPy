@@ -179,8 +179,11 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
     # Get current working directory.
     cwd = os.getcwd()
 
-    # Custom basis sets of interest not currently set up in Gaussian.
+    # Custom basis sets of interest not currently set up in Gaussian but are in the basis set exchange.
     custom = ['ORP', 'Sadlej+', 'Sadlej pVTZ']
+
+    # Custom basis sets of interest not currently in Gaussian or in the basis set exchange.
+    custom1 = ['LPol-ds', 'LPol-dl', 'LPol-fs', 'LPol-fl']
 
     # Gets original input file and submission script locations.
     data_locations = os.path.join(os.path.dirname(getsourcefile(lambda:0)), "data/")
@@ -193,6 +196,10 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
     # Change to test specific directory.
     for a in range(len(dir_list)):
         os.chdir(f"{dir_list[a]}")
+
+        # Gets input file location if optimization is entered as the spectroscopy.
+        if dir_parameters[a][0] == 'Optimization':
+            input_file = os.path.join(data_locations, "input_files/optimization/input.dat")
 
         conformer_count = 1
         while conformer_count <= int(dir_parameters[a][5]):
@@ -213,9 +220,10 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
             with open(f"{dir_list[a]}/cmpd_{conformer_count}/input.dat", "r+") as file:
                 content = file.read()
                 content = content.replace("MOLECULE_NAME_CONFORMER_NUMBER", f"{molecule_name}_cmpd_{conformer_count}_{dir_parameters[a][0]}_{dir_parameters[a][1]}_shell")
-                content = content.replace("SPECTROSCOPY", dir_parameters[a][0])
+                if dir_parameters[a][0] != 'Optimization':
+                    content = content.replace("SPECTROSCOPY", dir_parameters[a][0])
                 content = content.replace("FUNCTIONAL", dir_parameters[a][2])
-                if len(dir_parameters[a][3]) != 2 and dir_parameters[a][3] not in custom:
+                if len(dir_parameters[a][3]) != 2 and dir_parameters[a][3] not in custom and dir_parameters[a][3] not in custom1:
                     content = content.replace("BASIS_SET", dir_parameters[a][3])
                 else:
                     content = content.replace("BASIS_SET", 'Gen')
@@ -260,6 +268,29 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
                     elif current_basis == basis:
                         file.write(basis_data[1])
                         file.write("\n")
+
+                # Pulling custom basis set data from the SoAPy basis set library.
+                if dir_parameters[a][3] in custom1 and len(dir_parameters[a][3]) != 2:
+                    current_basis = dir_parameters[a][3]
+                    if current_basis != basis:
+                        basis_file = os.path.join(data_locations, f"basis_sets/{dir_parameters[a][3]}.gbs")
+                        basis_file = open(f"{basis_file}", "r")
+                        lines = basis_file.readlines()
+                        lines = np.asarray(lines)
+                        for atom in atom_types:
+                            atom_indices = np.where(lines == f"{atom}" + "  0\n" )
+                            splt_indices = np.where(lines == "****\n")
+                            for atom_index in range(len(atom_indices[0])):
+                                for splt_index in range(len(splt_indices[0])):
+                                    if splt_indices[0][splt_index] == atom_indices[0][atom_index] - 1:
+                                        begin = splt_indices[0][splt_index]
+                                        end = splt_indices[0][splt_index + 1]
+                            count = begin
+                            while count < end:
+                                file.write(lines[count])
+                                count += 1
+                        file.write("****\n")
+
 
                 # Writing "Mixed" basis set data.
                 if len(dir_parameters[a][3]) == 2:
@@ -313,6 +344,9 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
                         file.write("****\n")
                         file.write("\n")
 
+                    # Still need to include LPol basis sets in the mixed basis set section.
+
+                
                 file.write('Surface=SAS')
 
                 file.write("\n")
