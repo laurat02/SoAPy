@@ -283,14 +283,12 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
                             for atom_index in range(len(atom_indices[0])):
                                 for splt_index in range(len(splt_indices[0])):
                                     if splt_indices[0][splt_index] == atom_indices[0][atom_index] - 1:
-                                        begin = splt_indices[0][splt_index]
+                                        begin = atom_indices[0][atom_index]
                                         end = splt_indices[0][splt_index + 1]
                             count = begin
-                            while count < end:
+                            while count <= end:
                                 file.write(lines[count])
                                 count += 1
-                        file.write("****\n")
-
 
                 # Writing "Mixed" basis set data.
                 if len(dir_parameters[a][3]) == 2:
