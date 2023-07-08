@@ -624,6 +624,64 @@ def generate_coordinates(atoms, frames, hdf5_location, dir_list, dir_parameters)
 
 
 
+def generate_coordinates_from_input(input_geometry, dir_list, dir_parameters):
+    """
+    Generate coordinates from user provided input.
+    This is currently set up to work with single molecules without explicit solvents.
+    Additionally, the program can only read Cartesian coordinates as input.
+    """
+    # Read input geometry into array.
+    geom = input_geometry.split()
+    geometry = np.array(geom)
+
+    # Getting number of atoms.
+    num_solute_atoms = len(geometry) // 5
+
+    # Separating coordinate data.
+    input_num = []
+    input_sym = []
+    input_X = []
+    input_Y = []
+    input_Z = []
+
+    for i in range(len(geometry)):
+        if i % 5 == 0:
+            input_num.append(int(geometry[i]))
+        if i % 5 == 1:
+            input_sym.append(str(geometry[i]))
+        if i % 5 == 2:
+            input_X.append(float(geometry[i]))
+        if i % 5 == 3:
+            input_Y.append(float(geometry[i]))
+        if i % 5 == 4:
+            input_Z.append(float(geometry[i]))
+
+    # Combining snapshot specific data into one array.
+    snapshot_data = []
+    snapshot_data.append(input_num)
+    snapshot_data.append(input_sym)
+    snapshot_data.append(input_X)
+    snapshot_data.append(input_Y)
+    snapshot_data.append(input_Z)
+ 
+    # Getting unique atoms.
+    atom_types = np.unique(input_sym)
+ 
+    # Setting up data array.
+    dir_data = []
+
+    # Setting up directory structure to access the coordinates.
+    for a in range(len(dir_list)):
+        test_data = []
+        snapshots = int(dir_parameters[a][5])
+        for index in range(1, snapshots+1):
+            test_data.append(snapshot_data)
+        dir_data.append(test_data)
+
+    return dir_data, num_solute_atoms, atom_types
+
+
+
 def generate_batch_submission_script(relative_dir_list, dir_parameters):
     """
     Creates a script to submit the jobs in batches.
