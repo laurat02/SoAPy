@@ -345,7 +345,7 @@ def generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute
                     # Still need to include LPol basis sets in the mixed basis set section.
 
                 
-                file.write('Surface=SAS')
+                #file.write('Surface=SAS')
 
                 file.write("\n")
                 file.write("\n")
