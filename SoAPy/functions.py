@@ -10,6 +10,7 @@ import requests
 import matplotlib as mpl
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
+import pandas as pd
 from inspect import getsourcefile
 
 
@@ -417,6 +418,7 @@ def collect_data(cwd, dir_list, dir_parameters):
             print(f"Snapshot: {conformer_count}")
             frequency = []
             intensity = []
+            num_imaginary_frequencies = None
             os.chdir(f"{dir_list[a]}/cmpd_{conformer_count}")
 
             with open("output.log", "r") as file_out:
@@ -438,6 +440,8 @@ def collect_data(cwd, dir_list, dir_parameters):
                         elif dir_parameters[a][0] == "ROA":
                             if split_line[0] == "CID3":
                                 intensity.extend(map(float, split_line[3:]))
+                        if num_imaginary_frequencies == None:
+                            num_imaginary_frequencies = 0
 
             # Calculate total number of vibrations for nonlinear molecules.
             num_vibrations = 3 * natom - 6
@@ -526,7 +530,48 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
 
     return dir_frequency_axis, dir_intensity_axis
 
-
+def overlap_integral(dir_frequency_axis, dir_intensity_axis, dir_list):
+    #Initialize variables for storage.
+    sample_intensity = []
+    sample_Frequency = []
+    overlap_list = []
+    #Collect data from first basis set for reference spectrum.
+    ref_intensity = dir_intensity_axis[0]
+    ref_frequency = dir_frequency_axis[0]
+    
+    #Find min and max to use for integration bounds.
+    ref_min = min(ref_frequency)
+    ref_max = max(ref_frequency)
+    
+    #Store the number of intensity values for each test spectrum to check for rounding errors that lead to NumPy Trapz error.
+    #ref_length = len(ref_intensity)
+    #ref_trapzcheck = pd.DataFrame(ref_length)
+    
+    for a in range(len(dir_list)):
+        #Collect Values for each test spectrum.
+        sample_intensity = dir_intensity_axis[a]
+        sample_Frequency = dir_frequency_axis[a]
+        
+        #Calculate each individual integral for the overlap function from "Simulation of Raman and Raman optical activity of saccharides in solution" by Palivec et al.
+        overlap = np.trapz(np.array(sample_intensity)*np.array(ref_intensity), x= [ref_min, ref_max])
+        deno1 = np.trapz(np.array(sample_intensity)*np.array(sample_intensity), x= [ref_min, ref_max])
+        deno2 = np.trapz(np.array(ref_intensity)*np.array(ref_intensity), x= [ref_min, ref_max])
+        deno = np.sqrt(deno1*deno2)
+        
+        #Divide overlap by normalization integrals.
+        overlap_tot = overlap/deno
+        
+        #Append data to list and set-up pandas data frames for convienient handling.
+        overlap_list.append(overlap_tot)
+        overlap_pandas = pd.DataFrame(overlap_list)
+        intensities_pandas = pd.DataFrame(ref_intensity, sample_intensity)
+        
+        #Store the number of intensity values for each test spectrum to check for rounding errors that lead to NumPy Trapz error.
+        #test_length = len(sample_intensity)
+        #test_trapzcheck = pd.DataFrame(test_length)
+    
+    
+    return ref_intensity, sample_intensity, overlap_pandas, intensities_pandas, #test_trapzcheck, ref_trapzcheck
 
 
 
