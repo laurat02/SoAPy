@@ -95,7 +95,7 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
     custom = ['ORP', 'Sadlej+', 'Sadlej pVTZ']
 
     # Custom basis sets of interest not currently in Gaussian or in the basis set exchange.
-    custom1 = ['LPol-ds', 'LPol-dl', 'LPol-fs', 'LPol-fl']
+    custom1 = ['LPol-ds', 'LPol-dl', 'LPol-fs', 'LPol-fl', 'augD-3-21G', 'augT3-3-21G', 'R-ORP']
 
     # Setting up basis variable for pulling data from BSE.
     basis = 'X'
@@ -155,10 +155,6 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                             file.write(" nm")
                     file.write("\n")
                     file.write("\n")
-
-#                print(type(dir_parameters[a][3]))
-#                if type(dir_parameters[a][3]) == "<class 'str'>":
-#                    print("Hell yeah!")
 
                 # Pulling custom basis set data from the Basis Set Exchange API.
                 if dir_parameters[a][3] in custom and len(dir_parameters[a][3]) != 2:

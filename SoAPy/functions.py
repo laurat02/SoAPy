@@ -443,6 +443,12 @@ def collect_data(cwd, dir_list, dir_parameters):
                         if num_imaginary_frequencies == None:
                             num_imaginary_frequencies = 0
 
+                # Correcting units according to the Gaussian output.
+                if dir_parameters[a][0] == "VCD":
+                    intensity = [i * 10**-44 for i in intensity]
+                if dir_parameters[a][0] == "ROA":
+                    intensity = [i * 10**4 for i in intensity]
+
             # Calculate total number of vibrations for nonlinear molecules.
             num_vibrations = 3 * natom - 6
 
@@ -451,6 +457,7 @@ def collect_data(cwd, dir_list, dir_parameters):
                 print("No discrepancies between frequencies and intensities obtained from output.")
             else:
                 print("Discrepancy between the frequncies, intensities, and number of vibrations.")
+
             # The possible discrepancy between line splits and the number of vibrational frequencies can be eliminated by removing the imaginary frequencies which we choose to do regardless of whether the descrepancy exists or not.
             real_frequencies = []
             real_intensities = []
@@ -487,21 +494,24 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
     # Initialize directory level arrays for plotting.
     dir_frequency_axis = []
     dir_intensity_axis = []
+    max_intensity = []
 
     for a in range(len(dir_list)):
         # Sorts the frequencies and intensities for a given test in ascending order of frequencies.
         spec_frequencies, spec_intensities = zip(*sorted(zip(dir_frequencies[a], dir_intensities[a])))
 
         # Define the interval at which points will be plotted for the x-coordinate.
-        delta = float((max(spec_frequencies)-min(spec_frequencies))/number_of_points)
-        
+        #delta = float((max(spec_frequencies)-min(spec_frequencies))/number_of_points)
+        delta = float((np.amax(np.array(dir_frequencies))-np.amin(np.array(dir_frequencies)))/number_of_points)
+
         # Compute the "spec_frequencies" array in electron volts (eV).
         spec_frequencies_eV = np.zeros_like(spec_frequencies)
         for i in range(len(spec_frequencies)):
             spec_frequencies_eV[i] = spec_frequencies[i]/8065.54429
 
         # Obtain the values associated with the x-coordinates in cm-1 and eV.        
-        frequency_axis = np.arange(min(spec_frequencies), max(spec_frequencies), delta)
+        #frequency_axis = np.arange(min(spec_frequencies), max(spec_frequencies), delta)
+        frequency_axis = np.arange(np.amin(np.array(dir_frequencies)), np.amax(np.array(dir_frequencies)), delta)
         frequency_axis_eV = frequency_axis/8065.54429
 
         # Initialize the array associated with the y-coordinates.
@@ -524,63 +534,108 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
                     intensity_axis[b] += normalized_spec_intensities[c]*(2/np.pi)*(fwhm/(4*(frequency_axis_eV[b]-spec_frequencies_eV[c])**2+fwhm**2))
 
         # NEED TO CHECK UNITS FOR BOTH OF THESE EQUATIONS. THIS INCLUDES UNITS ON FWHM.
+        # NEED TO ADD NORMALIZATION FUNCTION FOR THESE EQUATIONS.
 
+        # Appending maximum intensity for normalization.
+        max_intensity.append(max(np.absolute(intensity_axis)))
+
+        # Appending frequencies and intensities to directory level arrays.
         dir_frequency_axis.append(frequency_axis)
-        dir_intensity_axis.append(intensity_axis)        
+        dir_intensity_axis.append(intensity_axis)
 
-    return dir_frequency_axis, dir_intensity_axis
+    return dir_frequency_axis, dir_intensity_axis, max_intensity
 
-def overlap_integral(dir_frequency_axis, dir_intensity_axis, dir_list):
-    #Initialize variables for storage.
-    sample_intensity = []
-    sample_Frequency = []
-    overlap_list = []
-    #Collect data from first basis set for reference spectrum.
-    ref_intensity = dir_intensity_axis[0]
-    ref_frequency = dir_frequency_axis[0]
-    
-    #Find min and max to use for integration bounds.
-    ref_min = min(ref_frequency)
-    ref_max = max(ref_frequency)
-    
-    #Store the number of intensity values for each test spectrum to check for rounding errors that lead to NumPy Trapz error.
-    #ref_length = len(ref_intensity)
-    #ref_trapzcheck = pd.DataFrame(ref_length)
+
+
+def single_denominator_overlap(dir_frequency_axis, dir_intensity_axis, sample_index, reference_index):
+    """
+    Function for computing the overlap between two spectra. This function includes a normalization associated with only one of the two spectra rather than both.
+    This is specifically designed to include discrepancies between intensities which the "double_denominator_overlap" would neglect.
+    """
+    # Set sample variables.
+    sample_intensity = np.array(dir_intensity_axis[sample_index])
+
+    # Set reference variables.
+    reference_frequency = np.array(dir_frequency_axis[reference_index])
+    reference_intensity = np.array(dir_intensity_axis[reference_index])
+
+    # Calculate numerator.
+    numerator = np.trapz(reference_intensity * sample_intensity, x = reference_frequency)
+
+    # Calculate denominator.
+    if np.trapz(reference_intensity * reference_intensity, x = reference_frequency) > np.trapz(sample_intensity * sample_intensity, x = reference_frequency):
+        denominator = np.trapz(reference_intensity * reference_intensity, x = reference_frequency)
+    else:
+        denominator = np.trapz(sample_intensity * sample_intensity, x = reference_frequency)
+
+    # Calculate overlap.
+    overlap = numerator / denominator
+
+    return overlap
+
+
+
+def double_denominator_overlap(dir_frequency_axis, dir_intensity_axis, sample_index, reference_index):
+    """ 
+    Function for computing the overlap between two spectra. This function includes a normalization associated with only one of the two spectra rather than both.
+    This is specifically designed to include discrepancies between intensities which the "double_denominator_overlap" would neglect.
+    """
+    # Set sample variables.
+    sample_intensity = np.array(dir_intensity_axis[sample_index])
+
+    # Set reference variables.
+    reference_frequency = np.array(dir_frequency_axis[reference_index])
+    reference_intensity = np.array(dir_intensity_axis[reference_index])
+
+    # Calculate numerator.
+    numerator = np.trapz(reference_intensity * sample_intensity, x = reference_frequency)
+
+    # Calculate denominator.
+    denominator = np.sqrt(np.trapz(reference_intensity * reference_intensity, x = reference_frequency) * np.trapz(sample_intensity * sample_intensity, x = reference_frequency))
+
+    # Calculate overlap.
+    overlap = numerator / denominator
+
+    return overlap
+
+
+
+def compute_intensity_data(dir_list, dir_parameters, dir_intensities):
+    """
+    Computes the mean, variance, and standard deviation.
+    """
+    # Initialize directory level arrays.
+    dir_mean = []
+    dir_variance = []
+    dir_standard_deviation = []
     
     for a in range(len(dir_list)):
-        #Collect Values for each test spectrum.
-        sample_intensity = dir_intensity_axis[a]
-        sample_Frequency = dir_frequency_axis[a]
-        
-        #Calculate each individual integral for the overlap function from "Simulation of Raman and Raman optical activity of saccharides in solution" by Palivec et al.
-        overlap = np.trapz(np.array(sample_intensity)*np.array(ref_intensity), x= [ref_min, ref_max])
-        deno1 = np.trapz(np.array(sample_intensity)*np.array(sample_intensity), x= [ref_min, ref_max])
-        deno2 = np.trapz(np.array(ref_intensity)*np.array(ref_intensity), x= [ref_min, ref_max])
-        deno = np.sqrt(deno1*deno2)
-        
-        #Divide overlap by normalization integrals.
-        overlap_tot = overlap/deno
-        
-        #Append data to list and set-up pandas data frames for convienient handling.
-        overlap_list.append(overlap_tot)
-        overlap_pandas = pd.DataFrame(overlap_list)
-        intensities_pandas = pd.DataFrame(ref_intensity, sample_intensity)
-        
-        #Store the number of intensity values for each test spectrum to check for rounding errors that lead to NumPy Trapz error.
-        #test_length = len(sample_intensity)
-        #test_trapzcheck = pd.DataFrame(test_length)
-    
-    
-    return ref_intensity, sample_intensity, overlap_pandas, intensities_pandas, #test_trapzcheck, ref_trapzcheck
+        # Calculate normalized mean intensity.
+        mean = np.average(np.divide(dir_intensities[a], abs(max(dir_intensities[a], key=abs))))
+        #mean = np.average(dir_intensities[a])
 
+        # Calculate variance in intensities.
+        variance_numerator = 0
+        for b in range(len(dir_intensities[a])):
+            #variance_numerator += (dir_intensities[a][b] - mean)**2
+            variance_numerator += (np.divide(dir_intensities[a][b], abs(max(dir_intensities[a], key=abs))) - mean)**2
+        variance = variance_numerator / len(dir_intensities[a])
 
+        # Calculate the standard deviation.
+        standard_deviation = np.sqrt(variance)
 
+        # Append values to directory level arrays.
+        dir_mean.append(float(mean))
+        dir_variance.append(float(variance))
+        dir_standard_deviation.append(float(standard_deviation))
 
+        #print("____________________________")
+        #print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
+        #print("Mean: ", mean)
+        #print("Variance: ", variance)
+        #print("Standard Deviation: ", standard_deviation)
 
-
-
-
-
+    return dir_mean, dir_variance, dir_standard_deviation    
 
 
 
