@@ -547,87 +547,6 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
 
 
 
-def single_denominator_overlap(dir_frequency_axis, dir_intensity_axis, sample_index, reference_index):
-    """
-    Function for computing the overlap between two spectra. This function includes a normalization associated with only one of the two spectra rather than both.
-    This is specifically designed to include discrepancies between intensities which the "double_denominator_overlap" would neglect.
-    """
-    # Set sample variables.
-    sample_intensity = np.array(dir_intensity_axis[sample_index])
-
-    # Set reference variables.
-    reference_frequency = np.array(dir_frequency_axis[reference_index])
-    reference_intensity = np.array(dir_intensity_axis[reference_index])
-
-    # Calculate numerator.
-    numerator = np.trapz(reference_intensity * sample_intensity, x = reference_frequency)
-
-    # Calculate denominator.
-    if np.trapz(reference_intensity * reference_intensity, x = reference_frequency) > np.trapz(sample_intensity * sample_intensity, x = reference_frequency):
-        denominator = np.trapz(reference_intensity * reference_intensity, x = reference_frequency)
-    else:
-        denominator = np.trapz(sample_intensity * sample_intensity, x = reference_frequency)
-
-    # Calculate overlap.
-    overlap = numerator / denominator
-
-    return overlap
-
-
-
-def double_denominator_overlap(dir_frequency_axis, dir_intensity_axis, sample_index, reference_index):
-    """ 
-    Function for computing the overlap between two spectra. This function includes a normalization associated with only one of the two spectra rather than both.
-    This is specifically designed to include discrepancies between intensities which the "double_denominator_overlap" would neglect.
-    """
-    # Set sample variables.
-    sample_intensity = np.array(dir_intensity_axis[sample_index])
-
-    # Set reference variables.
-    reference_frequency = np.array(dir_frequency_axis[reference_index])
-    reference_intensity = np.array(dir_intensity_axis[reference_index])
-
-    # Calculate numerator.
-    numerator = np.trapz(reference_intensity * sample_intensity, x = reference_frequency)
-
-    # Calculate denominator.
-    denominator = np.sqrt(np.trapz(reference_intensity * reference_intensity, x = reference_frequency) * np.trapz(sample_intensity * sample_intensity, x = reference_frequency))
-
-    # Calculate overlap.
-    overlap = numerator / denominator
-
-    return overlap
-
-
-
-def compute_intensity_data(dir_list, dir_parameters, dir_intensities):
-    """
-    Computes the mean, variance, and standard deviation.
-    """
-    # Initialize directory level arrays.
-    dir_mean = []
-    dir_variance = []
-    dir_standard_deviation = []
-    
-    for a in range(len(dir_list)):
-        # Calculate normalized mean intensity.
-        mean = np.average(np.divide(dir_intensities[a], abs(max(dir_intensities[a], key=abs))))
-        #mean = np.average(dir_intensities[a])
-
-        # Calculate variance in intensities.
-        variance_numerator = 0
-        for b in range(len(dir_intensities[a])):
-            #variance_numerator += (dir_intensities[a][b] - mean)**2
-            variance_numerator += (np.divide(dir_intensities[a][b], abs(max(dir_intensities[a], key=abs))) - mean)**2
-        variance = variance_numerator / len(dir_intensities[a])
-
-        # Calculate the standard deviation.
-        standard_deviation = np.sqrt(variance)
-
-        # Append values to directory level arrays.
-        dir_mean.append(float(mean))
-        dir_variance.append(float(variance))
-        dir_standard_deviation.append(float(standard_deviation))
 
         #print("____________________________")
         #print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
@@ -635,7 +554,6 @@ def compute_intensity_data(dir_list, dir_parameters, dir_intensities):
         #print("Variance: ", variance)
         #print("Standard Deviation: ", standard_deviation)
 
-    return dir_mean, dir_variance, dir_standard_deviation    
 
 
 
