@@ -401,6 +401,7 @@ def collect_data(cwd, dir_list, dir_parameters):
     # Initialize directory level arrays.
     dir_frequencies = []
     dir_intensities = []
+    dir_nbf = []
 
     # Change to test specific directory.
     for a in range(len(dir_list)):
@@ -442,6 +443,8 @@ def collect_data(cwd, dir_list, dir_parameters):
                                 intensity.extend(map(float, split_line[3:]))
                         if num_imaginary_frequencies == None:
                             num_imaginary_frequencies = 0
+                        if split_line[0] == "NBasis=":
+                            nbf = int(split_line[1])
 
                 # Correcting units according to the Gaussian output.
                 if dir_parameters[a][0] == "VCD":
@@ -468,7 +471,7 @@ def collect_data(cwd, dir_list, dir_parameters):
                 real_intensities.append(intensity[j])
                 j -= 1
 
-            print(f"GFE = {delta_G} \t Number of Atoms = {natom} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}")
+            print(f"GFE = {delta_G} \t Number of Atoms = {natom} \t Number of Basis Functions = {nbf} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}")
 
             # Print frequencies and intensities to output file.
             with open(f"{cwd}/output_data.txt", "a") as file:
@@ -482,8 +485,9 @@ def collect_data(cwd, dir_list, dir_parameters):
 
         dir_frequencies.append(test_frequencies)
         dir_intensities.append(test_intensities)
+        dir_nbf.append(nbf)
 
-    return dir_frequencies, dir_intensities
+    return dir_frequencies, dir_intensities, dir_nbf
 
 
 

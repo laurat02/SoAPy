@@ -27,10 +27,10 @@ def single_denominator_overlap(dir_frequency_axis, dir_intensity_axis, sample_in
     numerator = np.trapz(reference_intensity * sample_intensity, x = reference_frequency)
 
     # Calculate denominator.
-    if np.trapz(reference_intensity * reference_intensity, x = reference_frequency) > np.trapz(sample_intensity * sample_intensity, x = reference_frequency):
-        denominator = np.trapz(reference_intensity * reference_intensity, x = reference_frequency)
-    else:
-        denominator = np.trapz(sample_intensity * sample_intensity, x = reference_frequency)
+    #if np.trapz(reference_intensity * reference_intensity, x = reference_frequency) > np.trapz(sample_intensity * sample_intensity, x = reference_frequency):
+    denominator = np.trapz(reference_intensity * reference_intensity, x = reference_frequency)
+    #else:
+    #    denominator = np.trapz(sample_intensity * sample_intensity, x = reference_frequency)
 
     # Calculate overlap.
     overlap = numerator / denominator
@@ -76,10 +76,10 @@ def integrated_difference(dir_frequency_axis, dir_intensity_axis, sample_index, 
     reference_intensity = np.array(dir_intensity_axis[reference_index])
 
     # Calculate numerator.
-    numerator = np.trapz(reference_intensity - sample_intensity, x = reference_frequency)
+    numerator = np.trapz(reference_intensity**2, x = reference_frequency) - np.trapz(sample_intensity**2, x = reference_frequency)
 
     # Calculate denominator.
-    denominator = np.trapz(reference_intensity + sample_intensity, x = reference_frequency)
+    denominator = np.trapz(reference_intensity**2, x = reference_frequency)
 
     # Calculate integrated difference.
     int_diff = numerator / denominator
