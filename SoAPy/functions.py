@@ -405,8 +405,8 @@ def collect_data(cwd, dir_list, dir_parameters):
 
     # Change to test specific directory.
     for a in range(len(dir_list)):
-        print("____________________________")
-        print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
+        #print("____________________________")
+        #print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
         with open(f"{cwd}/output_data.txt", "a") as file:
             file.write(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}\n")
 
@@ -416,7 +416,7 @@ def collect_data(cwd, dir_list, dir_parameters):
         # Obtain data from each conformer in the test.
         conformer_count = 1 
         while conformer_count <= int(dir_parameters[a][5]):
-            print(f"Snapshot: {conformer_count}")
+            #print(f"Snapshot: {conformer_count}")
             frequency = []
             intensity = []
             num_imaginary_frequencies = None
@@ -456,10 +456,10 @@ def collect_data(cwd, dir_list, dir_parameters):
             num_vibrations = 3 * natom - 6
 
             # Confirming that all vibrational frequencies have obtained from the Gaussian output file. This is required since some of the imaginary frequencies result in line splits that don't separate correctly.
-            if len(frequency) == len(intensity) and len(frequency) == num_vibrations:
-                print("No discrepancies between frequencies and intensities obtained from output.")
-            else:
-                print("Discrepancy between the frequncies, intensities, and number of vibrations.")
+            #if len(frequency) == len(intensity) and len(frequency) == num_vibrations:
+            #    print("No discrepancies between frequencies and intensities obtained from output.")
+            #else:
+            #    print("Discrepancy between the frequncies, intensities, and number of vibrations.")
 
             # The possible discrepancy between line splits and the number of vibrational frequencies can be eliminated by removing the imaginary frequencies which we choose to do regardless of whether the descrepancy exists or not.
             real_frequencies = []
@@ -471,7 +471,7 @@ def collect_data(cwd, dir_list, dir_parameters):
                 real_intensities.append(intensity[j])
                 j -= 1
 
-            print(f"GFE = {delta_G} \t Number of Atoms = {natom} \t Number of Basis Functions = {nbf} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}")
+            #print(f"GFE = {delta_G} \t Number of Atoms = {natom} \t Number of Basis Functions = {nbf} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}")
 
             # Print frequencies and intensities to output file.
             with open(f"{cwd}/output_data.txt", "a") as file:
@@ -551,12 +551,6 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
 
 
 
-
-        #print("____________________________")
-        #print(f"Spectroscopy: {dir_parameters[a][0]} || Solvent Shell Type: {dir_parameters[a][1]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Distance: {dir_parameters[a][4]} || Snapshots: {dir_parameters[a][5]}")
-        #print("Mean: ", mean)
-        #print("Variance: ", variance)
-        #print("Standard Deviation: ", standard_deviation)
 
 
 

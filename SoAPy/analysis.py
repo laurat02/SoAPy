@@ -82,7 +82,7 @@ def integrated_difference(dir_frequency_axis, dir_intensity_axis, sample_index, 
     denominator = np.trapz(reference_intensity**2, x = reference_frequency)
 
     # Calculate integrated difference.
-    int_diff = numerator / denominator
+    int_diff = 1 - numerator / denominator
 
     return int_diff
 
