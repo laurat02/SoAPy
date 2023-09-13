@@ -477,7 +477,7 @@ def collect_data(cwd, dir_list, dir_parameters):
             with open(f"{cwd}/output_data.txt", "a") as file:
                 file.write(f"Snapshot = {conformer_count} \t GFE = {delta_G} \t Number of Atoms = {natom} \t Vibrational Frequencies = {num_vibrations} \t Imaginary Frequencies = {num_imaginary_frequencies}\n")
                 for i in range(num_real_vibrations):
-                    file.write("{:.4f} \t {:.4f}\n".format(real_frequencies[i], real_intensities[i]))
+                    file.write("{:.4f} \t {:e}\n".format(real_frequencies[i], real_intensities[i]))
             test_frequencies.extend(real_frequencies)
             test_intensities.extend(real_intensities)
 

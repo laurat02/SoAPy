@@ -82,7 +82,7 @@ def integrated_difference(dir_frequency_axis, dir_intensity_axis, sample_index, 
     denominator = np.trapz(reference_intensity**2, x = reference_frequency)
 
     # Calculate integrated difference.
-    int_diff = 1 - numerator / denominator
+    int_diff = numerator / denominator
 
     return int_diff
 
@@ -116,6 +116,38 @@ def compute_statistics(dir_intensities, sample_index, reference_index):
     standard_deviation_diff = abs(reference_standard_deviation - sample_standard_deviation)
 
     return mean_diff, variance_diff, standard_deviation_diff
+
+
+
+def wrong_signs(dir_frequencies, dir_intensities, sample_index, reference_index):
+    """
+    Prints out the frequencies at which there is a sign change. This could be due to normal mode rearrangements or wrong signs. Further developement is needed to distinguish.
+    """
+    # Set sample variables.
+    sample_frequency = np.array(dir_frequencies[sample_index])
+    sample_intensity = np.array(dir_intensities[sample_index])
+
+    # Set reference variables.
+    reference_frequency = np.array(dir_frequencies[reference_index])
+    reference_intensity = np.array(dir_intensities[reference_index])
+
+    # Calculate frequency displacement and sign change.
+    delta_freq = []
+    sign_change = []
+    for a in range(len(reference_frequency)):
+        frequency_displacement = reference_frequency[a] - sample_frequency[a]
+        intensity_sign = sample_intensity[a] / reference_intensity[a]
+        if intensity_sign > 0:
+            sign = 1
+        elif intensity_sign < 0:
+            sign = -1
+
+        delta_freq.append(frequency_displacement)
+        sign_change.append(sign)
+
+    return delta_freq, sign_change
+
+
 
 
 
