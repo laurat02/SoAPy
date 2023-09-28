@@ -149,6 +149,45 @@ def wrong_signs(dir_frequencies, dir_intensities, sample_index, reference_index)
 
 
 
+def normal_mode_reordering(dir_frequencies, dir_intensities, sample_index, reference_index):
+    """
+    Looks for normal mode reorderings by sign changes in the slope between consecutive normal modes.
+    """
+    # Set sample variables.
+    sample_frequency = np.array(dir_frequencies[sample_index])
+    sample_intensity = np.array(dir_intensities[sample_index])
+
+    # Set reference variables.
+    reference_frequency = np.array(dir_frequencies[reference_index])
+    reference_intensity = np.array(dir_intensities[reference_index])
+
+    # Calculate frequency displacement and sign change.
+    slope_sign = []
+    for a in range(len(reference_frequency)):
+        if a == len(reference_frequency)-1:
+            slope_sign.append(0)
+        else:
+            delta_reference_frequency = reference_frequency[a] - reference_frequency[a+1]
+            delta_reference_intensity = reference_intensity[a] - reference_intensity[a+1]
+            reference_derivative = delta_reference_intensity / delta_reference_frequency
+
+            delta_sample_frequency = sample_frequency[a] - sample_frequency[a+1]
+            delta_sample_intensity = sample_intensity[a] - sample_intensity[a+1]
+            sample_derivative = delta_sample_intensity / delta_sample_frequency
+
+            derivative_sign = sample_derivative / reference_derivative
+
+            if derivative_sign > 0:
+                sign = 1
+            elif derivative_sign < 0:
+                sign = -1
+
+            slope_sign.append(sign)
+
+    return slope_sign
+
+
+
 
 
 
