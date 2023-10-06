@@ -53,8 +53,8 @@ def set_options(spectroscopy, shell_type, functional, basis_set, distance_thresh
                             dir_name = spectroscopy[a]
                             if num_shells > 1:
                                 dir_name = dir_name + '/' + shell_type[b]
-                            if num_functionals > 1:
-                                dir_name = dir_name + '/' + functional[c]
+                            #if num_functionals > 1:
+                            dir_name = dir_name + '/' + functional[c]
                             if num_bases > 1:
                                 if len(basis_set[d]) == 2:
                                     dir_name = dir_name + '/' + basis_set[d][0] + '_' + basis_set[d][1]
@@ -491,7 +491,7 @@ def collect_data(cwd, dir_list, dir_parameters):
 
 
 
-def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities):
+def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities, min_frequency, max_frequency):
     """
     Generates the spectrum for each test. The spectral generation uses a simple averaging algorithm to weight the snapshots.
     """
@@ -505,8 +505,8 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
         spec_frequencies, spec_intensities = zip(*sorted(zip(dir_frequencies[a], dir_intensities[a])))
 
         # Define the interval at which points will be plotted for the x-coordinate.
-        #delta = float((max(spec_frequencies)-min(spec_frequencies))/number_of_points)
-        delta = float((np.amax(np.array(dir_frequencies))-np.amin(np.array(dir_frequencies)))/number_of_points)
+        #delta = float((np.amax(np.array(dir_frequencies))-np.amin(np.array(dir_frequencies)))/number_of_points)
+        delta = float((max_frequency - min_frequency)/number_of_points)
 
         # Compute the "spec_frequencies" array in electron volts (eV).
         spec_frequencies_eV = np.zeros_like(spec_frequencies)
@@ -514,8 +514,8 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
             spec_frequencies_eV[i] = spec_frequencies[i]/8065.54429
 
         # Obtain the values associated with the x-coordinates in cm-1 and eV.        
-        #frequency_axis = np.arange(min(spec_frequencies), max(spec_frequencies), delta)
-        frequency_axis = np.arange(np.amin(np.array(dir_frequencies)), np.amax(np.array(dir_frequencies)), delta)
+        #frequency_axis = np.arange(np.amin(np.array(dir_frequencies)), np.amax(np.array(dir_frequencies)), delta)
+        frequency_axis = np.arange(min_frequency, max_frequency, delta)
         frequency_axis_eV = frequency_axis/8065.54429
 
         # Initialize the array associated with the y-coordinates.
