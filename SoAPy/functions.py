@@ -503,7 +503,7 @@ def generate_spectrum(fwhm, number_of_points, dir_list, dir_parameters, dir_freq
     for a in range(len(dir_list)):
         # Sorts the frequencies and intensities for a given test in ascending order of frequencies.
         spec_frequencies, spec_intensities = zip(*sorted(zip(dir_frequencies[a], dir_intensities[a])))
-
+        
         # Define the interval at which points will be plotted for the x-coordinate.
         #delta = float((np.amax(np.array(dir_frequencies))-np.amin(np.array(dir_frequencies)))/number_of_points)
         delta = float((max_frequency - min_frequency)/number_of_points)
