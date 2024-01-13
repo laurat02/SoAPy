@@ -447,6 +447,7 @@ def collect_data(cwd, dir_list, dir_parameters):
             num_imaginary_frequencies = None
             os.chdir(f"{dir_list[a]}/cmpd_{conformer_count}")
 
+            # Data collection for ROA and VCD.
             if dir_parameters[a][0] != "OptRot":
                 with open("output.log", "r") as file_out:
                     for line in file_out:
@@ -507,6 +508,7 @@ def collect_data(cwd, dir_list, dir_parameters):
                 test_frequencies.extend(real_frequencies)
                 test_intensities.extend(real_intensities)
 
+            # Data collection for optical rotation.
             elif dir_parameters[a][0] == "OptRot":
                 with open("output.log", "r") as file_out:
                     for line in file_out:
