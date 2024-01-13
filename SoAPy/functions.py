@@ -99,15 +99,21 @@ def convert_GROMACS(molecule_name, trajectory_location):
         with open(f"{trajectory_location}", "r") as traj:
             content = traj.readlines()
             lines = len(content)
-            content.pop(0)
-            
+
+            # Identify the snapshot separator.
+            separator_identifier = content[0].split()
+            separator_identifier = separator_identifier[1]
+
+            #content.pop(0)
+
             # Iterate through the lines in the trajectory file.
             for i, line in enumerate(content):
                 column = line.split()
 
                 # Identifies the snapshot separator.
-                if column[1] != "Great":
-
+                #if column[1] != "Great":
+                if column[1] != separator_identifier:
+                    
                     # Get box dimensions.
                     if column[-1] == "90.000000":
                         for a in range(3):
@@ -132,7 +138,7 @@ def convert_GROMACS(molecule_name, trajectory_location):
                         connect.append(connect_line)
 
                 # Creates the datasets in the HDF5 file for the individual snapshot (group).
-                elif column[1] == "Great" or not line:
+                elif column[1] == separator_identifier or not line:
                     grp = h5.create_group(f"frame{frame_num}")
                     grp.create_dataset("atom_num", data = np.array(atom_num))
                     grp.create_dataset('atom_sym', data = np.array(atom_sym))
@@ -168,6 +174,25 @@ def convert_GROMACS(molecule_name, trajectory_location):
     hdf5_location = os.path.join(os.getcwd(), f"{molecule_name}.h5")
 
     return atoms, frames, hdf5_location
+
+
+
+def get_atoms_frames_from_GROMACS(molecule_name, trajectory_location):
+    """ 
+    Obtains the atoms and frames assuming an HDF5 file has already been generated.
+    """
+    # Open trajectory.
+    with open(f"{trajectory_location}","r") as traj:
+        content = traj.readlines()
+        lines = len(content)
+
+        # Get number of atoms.
+        atoms = int(content[0].split()[0])
+
+        # Calculate number of frames.
+        frames = int(lines / (atoms + 2))
+
+    return atoms, frames
 
 
 

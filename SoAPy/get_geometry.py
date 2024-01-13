@@ -33,7 +33,7 @@ def coordinates_from_trajectory(atoms, frames, hdf5_location, dir_list, dir_para
         temp_index = flag
 
         # Set the file to be read.
-        for index in range(1, snapshots+1):
+        for index in range(1, snapshots + 1):
             snapshot_data = []
             print(f'Compound Number: {index}')
             with h5py.File(f"{hdf5_location}", "r") as h5:
@@ -76,6 +76,78 @@ def coordinates_from_trajectory(atoms, frames, hdf5_location, dir_list, dir_para
                 num_solute_atoms = len(solute_num)
                 print(f'Number of Solute Atoms: {len(solute_num)}')
                 print(f'Number of Solvent Atoms: {len(solvent_num)}')
+
+                # If a solvent-only trajectory is provided, append the first solvent molecule to the solute arrays.
+                if num_solute_atoms == 0:
+                    solute_num.append(solvent_num[0])
+                    solute_sym.append(solvent_sym[0])
+                    solute_X.append(solvent_X[0])
+                    solute_Y.append(solvent_Y[0])
+                    solute_Z.append(solvent_Z[0])
+                    
+                    # Confirming presence of full solute molecule.
+                    solute_complete = False
+                    while not solute_complete:
+
+                        # Initialize potential new atom arrays.
+                        new_num = []
+                        new_sym = []
+                        new_X = []
+                        new_Y = []
+                        new_Z = []
+                        for i in range(len(solute_num)):
+                            atom_index = int(solute_num[i] - 1)
+                            for j in range(len(connect[i])):
+
+                                # Checking for duplicates.
+                                if connect[atom_index][j] != 0:
+                                    duplicate = False
+                                    for k in range(len(solute_num)):
+                                        if connect[atom_index][j] == solute_num[k]:
+                                            duplicate = True
+                                            break
+                                        elif connect[atom_index][j] != solute_num[k]:
+                                            for l in range(len(new_num)):
+                                                if connect[atom_index][j] == new_num[l]:
+                                                    duplicate = True
+                                                    break
+                                                elif connect[atom_index][j] != new_num[l]:
+                                                    duplicate = False
+
+                                    if duplicate == False:
+                                        new_num.append(int(connect[atom_index][j]))
+                                        solvent_index = int(connect[atom_index][j]) - 1
+
+                                        new_sym.append(solvent_sym[solvent_index])
+                                        new_X.append(solvent_X[solvent_index])
+                                        new_Y.append(solvent_Y[solvent_index])
+                                        new_Z.append(solvent_Z[solvent_index])
+
+                        # Adding new atoms to the list which will be used in the Gaussian input file.
+                        solute_num.extend(new_num)
+                        solute_sym.extend(new_sym)
+                        solute_X.extend(new_X)
+                        solute_Y.extend(new_Y)
+                        solute_Z.extend(new_Z)
+
+                        # Checking to see if all solvent molecules are complete.
+                        print("Number of New Solute Atoms: ", len(new_num))
+                        if len(new_num) == 0:
+                            solute_complete = True
+                            print("Solute Complete")
+                            break
+                        else:
+                            print("Solute Incomplete. Appending and obtaining connectivity of new atoms.")
+
+                    # Remove previously appended solute atoms from solvent arrays.
+                    sorted_solute = solute_num.copy()
+                    sorted_solute.sort(reverse=True)
+                    for m in sorted_solute:
+                        del solvent_num[m-1]
+                        del solvent_sym[m-1]
+                        del solvent_X[m-1]
+                        del solvent_Y[m-1]
+                        del solvent_Z[m-1]
 
                 # Compute average coordinate of solute molecule.
                 avg_X = np.mean(solute_X)
@@ -244,7 +316,7 @@ def coordinates_from_trajectory(atoms, frames, hdf5_location, dir_list, dir_para
                 else:
                     print("Solvent Incomplete. Appending and obtaining connectivity of new atoms.")
 
-                atom_types = np.unique(input_sym)
+            atom_types = np.unique(input_sym)
 
             print("Total Number of Atoms: ", len(input_num))
             print(" ")
