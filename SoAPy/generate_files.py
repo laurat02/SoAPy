@@ -127,10 +127,12 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                 else:
                     content = content.replace("SCRF=(solvent_model, Solvent=solvent) ", "")
                 content = content.replace("max_SCF_cycles", gaussian_parameters["max_SCF_cycles"])
-                if dir_parameters[a][0] != "optimization":
+                if dir_parameters[a][0] != "optimization" and dir_parameters[a][0] != "OptRot":
                     content = content.replace("SPECTROSCOPY", dir_parameters[a][0])
-                else:
+                elif dir_parameters[a][0] == "optimization":
                     content = content.replace(" Freq=SPECTROSCOPY", "")
+                elif dir_parameters[a][0] == "OptRot":
+                    content = content.replace("Freq=SPECTROSCOPY", "Polar=OptRot CPHF=RdFreq")
                 if len(dir_parameters[a][3]) != 2 and dir_parameters[a][3] not in custom and dir_parameters[a][3] not in custom1:
                     content = content.replace("BASIS_SET", dir_parameters[a][3])
                 else:
@@ -146,13 +148,13 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                 file.write("\n")
 
                 # Writing frequency of incident radiation for ROA.
-                if dir_parameters[a][0] == 'ROA':
+                if dir_parameters[a][0] == 'ROA' or dir_parameters[a][0] == 'OptRot':
                     for j in range(len(dir_parameters[a][6])):
-                        file.write(f"{dir_parameters[a][6][j]}")
-                        if len(dir_parameters[a][6]) != j + 1:
-                            file.write(", ")
-                        else:
-                            file.write(" nm")
+                        file.write(f"{dir_parameters[a][6][j]} ")
+                        #if len(dir_parameters[a][6]) != j + 1:
+                        #    file.write(", ")
+                        #else:
+                        #    file.write(" nm")
                     file.write("\n")
                     file.write("\n")
 
