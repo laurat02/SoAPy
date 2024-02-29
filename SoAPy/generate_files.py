@@ -84,7 +84,7 @@ def modify_SLURM(molecule_name, slurm_parameters, dir_list, dir_parameters):
 
 
 
-def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, dir_data, num_solute_atoms, atom_types):
+def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, dir_data, num_solute_atoms, all_atom_types, solute_atom_types=0, solvent_atom_types=0):
     """
     Modifies the specified input files.
     """
@@ -137,6 +137,10 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                     content = content.replace("BASIS_SET", dir_parameters[a][3])
                 else:
                     content = content.replace("BASIS_SET", 'Gen')
+                if gaussian_parameters["Overlay"]:
+                    content = content.replace("IOp", gaussian_parameters["IOp"])
+                else:
+                    content = content.replace("IOp", "") 
 
                 file.seek(0)
                 file.write(content)
@@ -168,7 +172,7 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                             'User-Agent': 'SOlvation Algorithm in PYthon (SoAPy)',
                             'From': 'bshumberger@vt.edu'
                         }
-                        params = {'elements': atom_types}
+                        params = {'elements': all_atom_types}
                         custom_basis_data = requests.get(base_url + '/api/basis/' + dir_parameters[a][3] + '/format/gaussian94', params=params, headers=headers)
                         basis_data = custom_basis_data.text.split('!----------------------------------------------------------------------\n\n\n')
                         file.write(basis_data[1])
@@ -186,7 +190,7 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                         basis_file = open(f"{basis_file}", "r")
                         lines = basis_file.readlines()
                         lines = np.asarray(lines)
-                        for atom in atom_types:
+                        for atom in all_atom_types:
                             atom_indices = np.where(lines == f"{atom}" + "  0\n" )
                             splt_indices = np.where(lines == "****\n")
                             for atom_index in range(len(atom_indices[0])):
@@ -199,6 +203,109 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                                 file.write(lines[count])
                                 count += 1
                 
+                # Writing "Mixed" basis set data.
+                if len(dir_parameters[a][3]) == 2:
+
+                    # Write data for solute basis set.
+                    file.write("1 - {} 0\n".format(num_solute_atoms))
+
+                    # Pulling custom basis set data from the Basis Set Exchange API.
+                    if dir_parameters[a][3][0] in custom:
+                        current_basis = dir_parameters[a][3][0]
+                        if current_basis != basis:
+                            main_bse_url = "http://basissetexchange.org"
+                            base_url = os.environ.get('BSE_API_URL', main_bse_url)
+                            headers = {
+                                'User-Agent': 'SOlvation Algorithm in PYthon (SoAPy)',
+                                'From': 'bshumberger@vt.edu'
+                            }
+                            params = {'elements': solute_atom_types}
+                            custom_basis_data = requests.get(base_url + '/api/basis/' + dir_parameters[a][3][0] + '/format/gaussian94', params=params, headers=headers)
+                            basis_data = custom_basis_data.text.split('!----------------------------------------------------------------------\n\n\n')
+                            file.write(basis_data[1])
+                            if custom_basis_data.status_code != 200:
+                                raise RuntimeError("Could not obtain data from the BSE. Check the error information above.")
+                            basis = current_basis
+                        elif current_basis == basis:
+                            file.write(basis_data[1])
+                    
+                    # Pulling custom basis set data from the SoAPy basis set library.
+                    elif dir_parameters[a][3][0] in custom1:
+                        current_basis = dir_parameters[a][3][0]
+                        if current_basis != basis:
+                            basis_file = os.path.join(data_locations, f"basis_sets/{dir_parameters[a][3][0]}.gbs")
+                            basis_file = open(f"{basis_file}", "r")
+                            lines = basis_file.readlines()
+                            lines = np.asarray(lines)
+                            for atom in solute_atom_types:
+                                atom_indices = np.where(lines == f"{atom}" + "  0\n" )
+                                splt_indices = np.where(lines == "****\n")
+                                for atom_index in range(len(atom_indices[0])):
+                                    for splt_index in range(len(splt_indices[0])):
+                                        if splt_indices[0][splt_index] == atom_indices[0][atom_index] - 1:
+                                            begin = atom_indices[0][atom_index]
+                                            end = splt_indices[0][splt_index + 1]
+                                count = begin
+                                while count <= end:
+                                    file.write(lines[count])
+                                    count += 1
+                        elif current_basis == basis:
+                            file.write(basis_data[1])
+                    else:
+                        file.write("{}\n".format(dir_parameters[a][3][0]))
+                        file.write("****\n")
+
+                    # Write data for solvent basis set.
+                    file.write("{} - {} 0\n".format(num_solute_atoms + 1, len(dir_data[a][conformer_count-1][0])))
+                    if dir_parameters[a][3][1] in custom:
+                        current_basis = dir_parameters[a][3][1]
+                        if current_basis != basis:
+                            main_bse_url = "http://basissetexchange.org"
+                            base_url = os.environ.get('BSE_API_URL', main_bse_url)
+                            headers = {
+                                'User-Agent': 'SOlvation Algorithm in PYthon (SoAPy)',
+                                'From': 'bshumberger@vt.edu'
+                            }
+                            params = {'elements': solvent_atom_types}
+                            custom_basis_data = requests.get(base_url + '/api/basis/' + dir_parameters[a][3][1] + '/format/gaussian94', params=params, headers=headers)
+                            basis_data = custom_basis_data.text.split('!----------------------------------------------------------------------\n\n\n')
+                            file.write(basis_data[1])
+                            file.write("\n")
+                            if custom_basis_data.status_code != 200:
+                                raise RuntimeError("Could not obtain data from the BSE. Check the error information above.")
+                            basis = current_basis
+                        elif current_basis == basis:
+                            file.write(basis_data[1])
+                            file.write("\n")
+
+                    # Pulling custom basis set data from the SoAPy basis set library.
+                    elif dir_parameters[a][3][1] in custom1:
+                        current_basis = dir_parameters[a][3][1]
+                        if current_basis != basis:
+                            basis_file = os.path.join(data_locations, f"basis_sets/{dir_parameters[a][3][1]}.gbs")
+                            basis_file = open(f"{basis_file}", "r")
+                            lines = basis_file.readlines()
+                            lines = np.asarray(lines)
+                            for atom in solvent_atom_types:
+                                atom_indices = np.where(lines == f"{atom}" + "  0\n" )
+                                splt_indices = np.where(lines == "****\n")
+                                for atom_index in range(len(atom_indices[0])):
+                                    for splt_index in range(len(splt_indices[0])):
+                                        if splt_indices[0][splt_index] == atom_indices[0][atom_index] - 1:
+                                            begin = atom_indices[0][atom_index]
+                                            end = splt_indices[0][splt_index + 1]
+                                count = begin
+                                while count <= end:
+                                    file.write(lines[count])
+                                    count += 1
+                        elif current_basis == basis:
+                            file.write(basis_data[1])
+                            file.write("\n")
+                    else:
+                        file.write("{}\n".format(dir_parameters[a][3][1]))
+                        file.write("****\n")
+                        file.write("\n")
+
                 file.write("\n")
                 file.write("\n")
                 file.write("\n")

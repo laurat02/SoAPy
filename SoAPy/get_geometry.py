@@ -316,7 +316,24 @@ def coordinates_from_trajectory(atoms, frames, hdf5_location, dir_list, dir_para
                 else:
                     print("Solvent Incomplete. Appending and obtaining connectivity of new atoms.")
 
-            atom_types = np.unique(input_sym)
+            all_types = np.unique(input_sym)
+
+            ###
+            solute_types = np.unique(solute_sym)
+            solvent_types = np.unique(solvent_sym)
+            atomic_symbol = {'H' : 1,
+                             'He': 2,
+                             'Li': 3,
+                             'Be': 4,
+                             'B' : 5,
+                             'C' : 6,
+                             'N' : 7,
+                             'O' : 8,
+                             'F' : 9}
+            all_atom_types = sorted(all_types, key=lambda x: atomic_symbol[x])
+            solute_atom_types = sorted(solute_types, key=lambda x: atomic_symbol[x])
+            solvent_atom_types = sorted(solvent_types, key=lambda x: atomic_symbol[x])
+            ###
 
             print("Total Number of Atoms: ", len(input_num))
             print(" ")
@@ -336,7 +353,7 @@ def coordinates_from_trajectory(atoms, frames, hdf5_location, dir_list, dir_para
         # Adding all data to to be accessed later.
         dir_data.append(test_data)
 
-    return dir_data, num_solute_atoms, atom_types
+    return dir_data, num_solute_atoms, all_atom_types, solute_atom_types, solvent_atom_types
 
 
 
