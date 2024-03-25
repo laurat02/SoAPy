@@ -111,7 +111,7 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
 
                 # Replaces keywords with Gaussian parameters.
                 content = content.replace("MOLECULE_NAME_CONFORMER_NUMBER", f"{molecule_name}_cmpd_{conformer_count}_{dir_parameters[a][1]}_shell_{dir_parameters[a][3]}")
-                content = content.replace("checkpoint_file", f"{molecule_name}_cmpd_{conformer_count}")
+                #content = content.replace("checkpoint_file", f"{molecule_name}_cmpd_{conformer_count}")
                 content = content.replace("memory", gaussian_parameters["memory"])
                 content = content.replace("cores", gaussian_parameters["cores"])
                 content = content.replace("FUNCTIONAL", dir_parameters[a][2])

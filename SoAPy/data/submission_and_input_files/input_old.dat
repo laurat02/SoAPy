@@ -1,5 +1,6 @@
 %Mem=memory
 %NProcShared=cores
+%chk=checkpoint_file.chk
 #P FUNCTIONAL/BASIS_SET Opt=convergence Int=integrals SCRF=(solvent_model, Solvent=solvent) SCF(MaxCycle=max_SCF_cycles) Freq=SPECTROSCOPY IOp
 
 #MOLECULE_NAME_CONFORMER_NUMBER
