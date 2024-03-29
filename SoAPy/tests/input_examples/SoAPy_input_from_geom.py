@@ -1,9 +1,4 @@
-from SoAPy.functions import set_options
-from SoAPy.functions import make_directories
-from SoAPy.functions import generate_files
-from SoAPy.get_geometry import coordinates_from_input
-from SoAPy.functions import generate_batch_submission_script
-
+import SoAPy
 import time
 import os
 
@@ -35,22 +30,22 @@ frequency = []
 t0 = time.time()
 
 # What type of test is being researched, basis sets, distance thresholds, or number of snapshots?
-dir_list, dir_parameters, relative_dir_list = set_options(spectroscopy, shell_type, functional, basis_set, distance_threshold, snapshots, frequency)
+dir_list, dir_parameters, relative_dir_list = SoAPy.functions.set_options(spectroscopy, shell_type, functional, basis_set, distance_threshold, snapshots, frequency)
 t1 = time.time()
 
 # Make the directory structure.
-make_directories(dir_list)
+SoAPy.functions.make_directories(dir_list)
 
 # Generate coordinate data from input geometry.
-dir_data, num_solute_atoms, atom_types = coordinates_from_input(input_geometry, dir_list, dir_parameters)
+dir_data, num_solute_atoms, atom_types = SoAPy.get_geometry.coordinates_from_input(input_geometry, dir_list, dir_parameters)
 t2 = time.time()
 
 # Generate test specific input and SLURM files.
-generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute_atoms, atom_types)
+SoAPy.functions.generate_files(molecule_name, dir_list, dir_parameters, dir_data, num_solute_atoms, atom_types)
 t3 = time.time()
 
 # Generate batch submission script.
-generate_batch_submission_script(relative_dir_list, dir_parameters)
+SoAPy.functions.generate_batch_submission_script(relative_dir_list, dir_parameters)
 
 print("Total Time: ", t3-t0)
 
