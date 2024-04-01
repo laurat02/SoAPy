@@ -43,7 +43,7 @@ jobs:
           ulimit -a
 
       - name: Create SoAPy environment
-      - uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: SoAPy
           environment-file: devtools/conda-envs/SoAPy.yaml
