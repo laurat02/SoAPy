@@ -1,25 +1,30 @@
 name: CI
 
 on:
+  # GitHub has started calling new repo's first branch "main" https://github.com/github/renaming
+  # The cookiecutter uses the "--initial-branch" flag when it runs git-init
   push:
     branches:
-      - "main"
+      - "CI-beta"
   pull_request:
     branches:
-      - "main"
+      - "CI-beta"
   schedule:
     # Weekly tests run on main by default:
     #   Scheduled workflows run on the latest commit on the default or base branch.
     #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * 0"
 
 jobs:
   test:
-    defaults:
-      run:
-        shell: bash -l {0}
+    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+        python-version: [3.8, 3.9, "3.10"]
 
-    name: SoAPy test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
+        name: SoAPy test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -57,8 +62,3 @@ jobs:
           coverage run -m pytest
           coverage xml
           ls -l
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
