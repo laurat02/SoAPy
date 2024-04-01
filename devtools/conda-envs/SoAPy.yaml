@@ -1,15 +1,25 @@
-name: test
+name: SoAPy
 channels:
-
+  - conda-forge
   - defaults
 dependencies:
     # Base depends
   - python
   - pip
 
+    #Package Dependencies
+  - numpy
+  - h5py
+  - shutil
+  - scipy
+  - pandas
+  - matplotlib
+  - requests
+
     # Testing
   - pytest
   - pytest-cov
+  - codecov
 
   # Pip-only installs
   - pip:
