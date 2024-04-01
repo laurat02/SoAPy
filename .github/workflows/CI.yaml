@@ -50,15 +50,15 @@ jobs:
           python -m pip install . --no-deps
           micromamba list
 
-      - name: Run tests
-        # conda setup requires this special shell
-        shell: bash -l {0}
+      - name: Test and generate coverage report
         run: |
-          pytest -v --cov=SoAPy --cov-report=xml --color=yes SoAPy/tests/
+        export KMP_DUPLICATE_LIB_OK=TRUE
+        pip install coverage
+        coverage run -m pytest
+        coverage xml
+        ls -l
 
-      - name: CodeCov
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
