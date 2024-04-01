@@ -264,9 +264,6 @@ def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, d
     max_intensity = []
     dir_frequencies_new = []
     dir_intensities_new = []
-    dir_snapshot_axis = []
-    dir_integration_axis = []
-
 
     for a in range(len(dir_list)):
         print("Generating spectral data for test", a,".")
@@ -275,8 +272,6 @@ def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, d
         dir_frequency_axis.append([])
         dir_intensity_axis.append([])
         max_intensity.append([])
-        dir_snapshot_axis.append([])
-        dir_integration_axis.append([])
 
         for x in range(0,len(snapshot_list)):
             print("Calculating spectrum for",snapshot_list[x],"snapshots.")
@@ -338,13 +333,7 @@ def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, d
             dir_frequency_axis[a].append(frequency_axis)
             dir_intensity_axis[a].append(intensity_axis)
 
-            dir_snapshot_axis[a].append(snapshot_list[x])
-            dir_integration_axis[a].append(np.trapz(intensity_axis, x = frequency_axis))
-
-            #print(dir_snapshot_axis[a])
-            #print(dir_integration_axis[a])
-
-    return dir_frequency_axis, dir_intensity_axis, max_intensity, dir_snapshot_axis, dir_integration_axis
+    return dir_frequency_axis, dir_intensity_axis, max_intensity
 
 
 

@@ -104,7 +104,7 @@ def convert_GROMACS(molecule_name, trajectory_location):
             separator_identifier = content[0].split()
             separator_identifier = separator_identifier[1]
 
-            content.pop(0)
+            #content.pop(0)
 
             # Iterate through the lines in the trajectory file.
             for i, line in enumerate(content):
