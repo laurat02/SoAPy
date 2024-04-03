@@ -26,7 +26,7 @@ slurm_parameters = {'time': '1-00:00',
 
 gaussian_parameters = {'memory': '30GB',
                         'cores': '24',
-                        'Opt': True,
+                        'Opt': False,
                         'convergence': 'Tight',
                         'integrals': 'UltraFine',
                         'SCRF': False,

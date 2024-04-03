@@ -472,10 +472,15 @@ def coordinates_from_optimization(relative_dir_list, dir_parameters, optimizatio
                 # Confirm that a stationary point has been found.
                 if 'Stationary point found.' in line:
                     optimization_complete = True
+                if 'Number of steps exceeded' in line:
+                    NStep_line = line.split()
+                    nsteps = int(NStep_line[6])
 
             # Printing optimization status.
             print(f'Spectroscopy: {dir_parameters[a][0]} || Functional: {dir_parameters[a][2]} || Basis: {dir_parameters[a][3]} || Snapshots: {dir_parameters[a][5]}')            
             print('Optimization Complete: ', optimization_complete)
+            if optimization_complete == False:
+                print(f'Optimization terminated at step number {nsteps}.')
 
             # Get the beginning and ending lines of the geometry.
             begin = int(input_orientation_lines[-1] + 5)
