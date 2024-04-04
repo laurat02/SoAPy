@@ -41,10 +41,10 @@ jobs:
           activate-environment: SoAPy
           environment-file: devtools/conda-envs/SoAPy.yaml
           python-version: ${{ matrix.python-version }}
+          auto-activate-base: true
 
       - name: Install SoAPY
         run: |
-          export PATH=$CONDA_PREFIX/bin:$PATH
           conda init bash
           source ~/.bashrc
           conda activate SoAPy
