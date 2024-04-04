@@ -45,20 +45,13 @@ jobs:
 
       - name: Install SoAPY
         run: |
-          pip install numpy
-          pip install scipy
-          pip install matplotlib
-          pip install requests
-          pip install pandas
-          pip install shutil
           pip install -e .
+          pip install pytest
 
       - name: Test and generate coverage report
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUE
           pip install coverage
-          env
-          conda list
           coverage run -m pytest
           coverage xml
           ls -l
