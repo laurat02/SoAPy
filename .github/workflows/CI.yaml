@@ -45,7 +45,7 @@ jobs:
       - name: Install SoAPY
         run: |
           conda init bash
-          source ~./bashrc
+          source ~/.bashrc
           conda activate SoAPy 
           pip install -e .
 
