@@ -51,4 +51,4 @@ jobs:
 
       - name: Test and generate coverage report
         run: |
-          conda run -n SoAPy python pytest /tests
+          conda run -n SoAPy pytest /tests
