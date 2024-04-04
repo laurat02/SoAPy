@@ -45,9 +45,14 @@ jobs:
 
       - name: Install SoAPY
         run: |
-          conda init bash
-          source ~/.bashrc
-          conda activate SoAPy
+          conda info
+          conda list --show-channel-urls
+          hash -r
+          env
+          ls -l $CONDA
+#conda init bash
+#source ~/.bashrc
+#conda activate SoAPy
           pip install -e .
 
       - name: Test and generate coverage report
