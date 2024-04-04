@@ -5,10 +5,10 @@ on:
   # The cookiecutter uses the "--initial-branch" flag when it runs git-init
   push:
     branches:
-      - "CI-beta"
+      - "main"
   pull_request:
     branches:
-      - "CI-beta"
+      - "main"
   schedule:
     # Weekly tests run on main by default:
     #   Scheduled workflows run on the latest commit on the default or base branch.
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macOS-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         python-version: [3.11]
 
     steps:
@@ -41,17 +41,19 @@ jobs:
           activate-environment: SoAPy
           environment-file: devtools/conda-envs/SoAPy.yaml
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: true
 
       - name: Install SoAPY
         run: |
+          conda init bash
+          source ~/.bashrc
+          conda activate SoAPy
           pip install -e .
-          pip install pytest
 
       - name: Test and generate coverage report
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUE
           pip install coverage
+          pip install pytest
           coverage run -m pytest
           coverage xml
           ls -l

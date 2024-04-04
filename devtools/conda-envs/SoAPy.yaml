@@ -1,0 +1,27 @@
+name: SoAPy
+channels:
+  - conda-forge
+
+  - defaults
+dependencies:
+    # Base depends
+  - python
+  - pip
+  - hatchling
+  
+    # Package Depends
+
+  - numpy
+  - scipy
+  - h5py
+  - requests
+  - matplotlib
+
+    # Testing
+  - pytest
+  - pytest-cov
+
+  # Pip-only installs
+  - pip:
+    - codecov
+
