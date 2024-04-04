@@ -54,6 +54,7 @@ jobs:
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUE
           pip install coverage
+          env
           conda list
           coverage run -m pytest
           coverage xml
