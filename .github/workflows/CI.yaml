@@ -44,6 +44,9 @@ jobs:
 
       - name: Install SoAPY
         run: |
+          conda init bash
+          source ~/.bashrc
+          conda activate SoAPy
           pip install -e .
           pip install pytest
 
