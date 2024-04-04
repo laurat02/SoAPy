@@ -41,7 +41,6 @@ jobs:
           activate-environment: SoAPy
           environment-file: devtools/conda-envs/SoAPy.yaml
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: true
 
       - name: Install SoAPY
         run: |
