@@ -51,4 +51,8 @@ jobs:
 
       - name: Test and generate coverage report
         run: |
-          conda run -n SoAPy pytest /tests
+          export KMP_DUPLICATE_LIB_OK=TRUE
+          pip install coverage
+          coverage run -m pytest
+          coverage xml
+          ls -l

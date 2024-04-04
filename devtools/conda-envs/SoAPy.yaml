@@ -1,7 +1,5 @@
 name: SoAPy
 channels:
-  - conda-forge
-
   - defaults
 dependencies:
     # Base depends
