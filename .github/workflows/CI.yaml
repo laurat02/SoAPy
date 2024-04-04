@@ -42,8 +42,6 @@ jobs:
           environment-file: devtools/conda-envs/SoAPy.yaml
           python-version: ${{ matrix.python-version }}
           auto-activate-base: true
-        run: |
-          pip install -e .
 
       - name: Install SoAPY
         run: |
@@ -51,10 +49,4 @@ jobs:
 
       - name: Test and generate coverage report
         run: |
-          export KMP_DUPLICATE_LIB_OK=TRUE
-          pip install coverage
-          pip install pytest
-          conda list
-          coverage run -m pytest
-          coverage xml
-          ls -l
+          conda run -n SoAPy python pytest /tests
