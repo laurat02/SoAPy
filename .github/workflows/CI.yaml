@@ -50,9 +50,6 @@ jobs:
           hash -r
           env
           ls -l $CONDA
-#conda init bash
-#source ~/.bashrc
-#conda activate SoAPy
           pip install -e .
 
       - name: Test and generate coverage report
