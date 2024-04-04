@@ -48,12 +48,12 @@ jobs:
           source ~/.bashrc
           conda activate SoAPy
           pip install -e .
-          pip install pytest
 
       - name: Test and generate coverage report
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUE
           pip install coverage
+          pip install pytest
           coverage run -m pytest
           coverage xml
           ls -l
