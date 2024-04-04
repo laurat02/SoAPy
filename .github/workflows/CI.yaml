@@ -44,6 +44,7 @@ jobs:
 
       - name: Install SoAPY
         run: |
+          export PATH=$CONDA_PREFIX/bin:$PATH
           conda init bash
           source ~/.bashrc
           conda activate SoAPy

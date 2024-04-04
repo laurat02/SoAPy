@@ -16,6 +16,7 @@ dependencies:
   - h5py
   - requests
   - matplotlib
+  - pandas
 
     # Testing
   - pytest
