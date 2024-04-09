@@ -47,11 +47,13 @@ jobs:
           conda init bash
           source ~/.bashrc
           conda activate SoAPy
+          conda info
           pip install -e .
 
       - name: Test and generate coverage report
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUE
+          conda info
           pip install coverage
           pip install pytest
           coverage run -m pytest
