@@ -49,9 +49,15 @@ jobs:
           conda activate SoAPy
           conda info
           conda list
-          export PATH=$CONDA_PREFIX/bin:$PATH
-          export PYTHONPATH=$CONDA_PREFIX/lib:$PYTHONPATH
           pip install -e .
+          import numpy as np 
+          import pandas as pd
+          import h5py
+          import matplotlib as mpl
+          from scipy.signal import find_peaks
+          from inspect import getsourcefile
+          import shutil
+          
 
       - name: Test and generate coverage report
         run: |
