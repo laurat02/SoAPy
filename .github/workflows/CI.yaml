@@ -44,24 +44,21 @@ jobs:
 
       - name: Install SoAPY
         run: |
-          conda init bash
-          source ~/.bashrc
-          conda activate SoAPy
-          conda info
-          conda list
-          import pandas as pd
-          import numpy as np 
-          import h5py
-          import matplotlib as mpl
-          import shutil
+          pip install pandas
+          pip install shutil
+          pip install matplotlib
+          pip install h5py
+          pip install scipy
+          pip install requests
+          pip install numpy
           pip install -e .
-          pip install pytest
           
 
       - name: Test and generate coverage report
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUEs
           pip install coverage
+          pip install pytest
           coverage run -m pytest
           coverage xml
           ls -l
