@@ -49,19 +49,19 @@ jobs:
           conda activate SoAPy
           conda info
           conda list
-          pip install -e .
           python import numpy as np 
           python import pandas as pd
           python import h5py
           python import matplotlib as mpl
           python import shutil
+          pip install -e .
+          pip install pytest
           
 
       - name: Test and generate coverage report
         run: |
           export KMP_DUPLICATE_LIB_OK=TRUEs
           pip install coverage
-          pip install pytest
           coverage run -m pytest
           coverage xml
           ls -l
