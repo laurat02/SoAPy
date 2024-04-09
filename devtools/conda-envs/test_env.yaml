@@ -1,0 +1,25 @@
+name: test-env
+channels:
+  - defaults
+dependencies:
+    # Base depends
+  - python
+  - pip
+  
+    # Package Depends
+
+  - numpy
+  - scipy
+  - h5py
+  - requests
+  - matplotlib
+  - pandas
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+
+  # Pip-only installs
+  - pip:
+    - codecov
