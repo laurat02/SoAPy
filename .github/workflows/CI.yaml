@@ -49,11 +49,11 @@ jobs:
           conda activate SoAPy
           conda info
           conda list
-          python import numpy as np 
-          python import pandas as pd
-          python import h5py
-          python import matplotlib as mpl
-          python import shutil
+          import pandas as pd
+          import numpy as np 
+          import h5py
+          import matplotlib as mpl
+          import shutil
           pip install -e .
           pip install pytest
           
