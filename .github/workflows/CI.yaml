@@ -48,6 +48,7 @@ jobs:
           source ~/.bashrc
           conda activate SoAPy
           conda info
+          conda list
           pip install -e .
 
       - name: Test and generate coverage report
