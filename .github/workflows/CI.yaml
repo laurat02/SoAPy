@@ -36,7 +36,7 @@ jobs:
           ulimit -a
 
       - name: Create SoAPy environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: SoAPy
           environment-file: devtools/conda-envs/SoAPy.yaml
@@ -49,12 +49,13 @@ jobs:
           conda activate SoAPy
           conda info
           conda list
+          export PATH=$CONDA_PREFIX/bin:$PATH
+          export PYTHONPATH=$CONDA_PREFIX/lib:$PYTHONPATH
           pip install -e .
 
       - name: Test and generate coverage report
         run: |
-          export KMP_DUPLICATE_LIB_OK=TRUE
-          conda info
+          export KMP_DUPLICATE_LIB_OK=TRUEs
           pip install coverage
           pip install pytest
           coverage run -m pytest
