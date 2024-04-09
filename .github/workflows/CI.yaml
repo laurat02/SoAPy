@@ -50,13 +50,11 @@ jobs:
           conda info
           conda list
           pip install -e .
-          import numpy as np 
-          import pandas as pd
-          import h5py
-          import matplotlib as mpl
-          from scipy.signal import find_peaks
-          from inspect import getsourcefile
-          import shutil
+          python import numpy as np 
+          python import pandas as pd
+          python import h5py
+          python import matplotlib as mpl
+          python import shutil
           
 
       - name: Test and generate coverage report
