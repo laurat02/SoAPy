@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 [project]
 name = "SoAPy"
 description = "A package for research on SOlvation Algorithms in PYthon, SoAPy."
-
+dynamic =["version"]
 readme = "README.md"
 authors = [
     { name = "Brendan Shumberger", email = "bshumberger@vt.edu" }
@@ -29,7 +29,8 @@ dependencies = [
     "requests"
 ]
 
-
+[tool.hatch.version]
+source = "versioningit"
 
 [project.optional-dependencies]
 test = [
