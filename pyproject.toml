@@ -37,7 +37,7 @@ test = [
   "pytest-runner"
 ]
 
-[toll.hatch.version]
+[tool.hatch.version]
 path = "SoAPy/__init__.py"
 pattern = "BUILD = 'b(?P<version>[^']+)'"
 
