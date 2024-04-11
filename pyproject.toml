@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "versioningit~=2.0"]
+requires = ["hatchling >= 1.9", "versioningit~=2.0"]
 build-backend = "hatchling.build"
 
 # Self-descriptive entries which should always be present

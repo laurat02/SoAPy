@@ -44,12 +44,6 @@ jobs:
 
       - name: Install SoAPY
         run: |
-          pip install pandas
-          pip install matplotlib
-          pip install h5py
-          pip install scipy
-          pip install requests
-          pip install numpy
           pip install -e .
           
 
