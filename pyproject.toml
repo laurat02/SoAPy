@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools", "versioningit~=2.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "versioningit~=2.0"]
+build-backend = "hatchling.build"
 
 # Self-descriptive entries which should always be present
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
@@ -20,37 +20,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = ">=3.11"
-# Declare any run-time dependencies that should be installed with the package.
-#dependencies = [
-#   "importlib-resources;python_version<'3.10'",
-#]
-
-# Update the urls once the hosting is set up.
-#[project.urls]
-#"Source" = "https://github.com/<username>/SoAPy/"
-#"Documentation" = "https://SoAPy.readthedocs.io/"
-[tool.setuptools]
-zip-safe = false
-# Let setuptools discover the package in the current directory,
-# but be explicit about non-Python files.
-# See also:
-#   https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#setuptools-specific-configuration
-# Note that behavior is currently evolving with respect to how to interpret the
-# "data" and "tests" subdirectories. As of setuptools 63, both are automatically
-# included if namespaces is true (default), even if the package is named explicitly
-# (instead of using 'find'). With 'find', the 'tests' subpackage is discovered
-# recursively because of its __init__.py file, but the data subdirectory is excluded
-# with include-package-data = false and namespaces = false.
-include-package-data = false
-[tool.setuptools.packages.find]
-namespaces = false
-where = ["."]
-
-# Ref https://setuptools.pypa.io/en/latest/userguide/datafiles.html#package-data
-[tool.setuptools.package-data]
-SoAPy = [
-    "py.typed"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "h5py",
+    "pandas",
+    "requests"
 ]
+
 
 
 [project.optional-dependencies]
