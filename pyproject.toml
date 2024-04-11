@@ -37,9 +37,6 @@ test = [
   "pytest-runner"
 ]
 
-[tool.hatch.version]
-path = "SoAPy/__init__.py"
-pattern = "BUILD = 'b(?P<version>[^']+)'"
 
 [tool.versioningit]
 default-version = "1+unknown"
