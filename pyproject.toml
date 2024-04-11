@@ -19,7 +19,7 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "scipy",
@@ -37,7 +37,6 @@ test = [
   "pytest>=6.1.2",
   "pytest-runner"
 ]
-
 
 [tool.versioningit]
 default-version = "1+unknown"
