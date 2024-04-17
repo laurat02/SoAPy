@@ -154,7 +154,7 @@ def modify_input(molecule_name, gaussian_parameters, dir_list, dir_parameters, d
                 # Writing frequency of incident radiation for ROA.
                 if dir_parameters[a][0] == 'ROA' or dir_parameters[a][0] == 'OptRot':
                     for j in range(len(dir_parameters[a][6])):
-                        file.write(f"{dir_parameters[a][6][j]} nm ")
+                        file.write(f"{dir_parameters[a][6][j]}")
                         #if len(dir_parameters[a][6]) != j + 1:
                         #    file.write(", ")
                         #else:
