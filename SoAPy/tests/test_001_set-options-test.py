@@ -2,7 +2,7 @@ import SoAPy
 import os
 import pytest
 
-def set_options_test():
+def test_set_options():
     cwd = os.getcwd()
 
     # Molecule name
