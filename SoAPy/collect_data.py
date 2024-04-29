@@ -252,6 +252,7 @@ def generate_VCD_and_ROA_spectra(fwhm, number_of_points, dir_list, dir_parameter
 
 
 
+
 def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities, min_frequency, max_frequency, snapshot_list):
     """
     Generates the spectrum for each test assuming only one snapshot test has been performed and only VCD and ROA are being explored (not optical rotation). 
