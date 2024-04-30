@@ -12,6 +12,7 @@ dynamic =["version"]
 readme = "README.md"
 authors = [
     { name = "Brendan Shumberger", email = "bshumberger@vt.edu" }
+    { name = "Ethan Fink", email = "ethanhf@vt.edu" }
 ]
 license = { text = "BSD-3-Clause" }
 # See https://pypi.org/classifiers/
