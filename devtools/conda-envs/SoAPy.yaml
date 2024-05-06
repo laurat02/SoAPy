@@ -1,4 +1,4 @@
-name: test-env
+name: SoAPy
 channels:
   - defaults
 dependencies:
@@ -18,8 +18,8 @@ dependencies:
     # Testing
   - pytest
   - pytest-cov
-  - codecov
 
   # Pip-only installs
   - pip:
     - codecov
+

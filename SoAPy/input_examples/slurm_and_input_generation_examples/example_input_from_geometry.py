@@ -102,4 +102,3 @@ SoAPy.functions.generate_batch_submission_script(relative_dir_list, dir_paramete
 t6 = time.time()
 
 print("Total Time: ", t6-t0)
-
