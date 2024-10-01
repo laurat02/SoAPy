@@ -19,6 +19,7 @@ def collect_VCD_and_ROA_data(cwd, dir_list, dir_parameters):
     dir_frequencies = []
     dir_intensities = []
     dir_nbf = []
+    dir_fpe = []
 
     # Change to test specific directory.
     for a in range(len(dir_list)):
@@ -29,6 +30,7 @@ def collect_VCD_and_ROA_data(cwd, dir_list, dir_parameters):
 
         test_frequencies = []
         test_intensities = []
+        test_fpe = []
 
         # Obtain data from each conformer in the test.
         conformer_count = 1
@@ -38,6 +40,9 @@ def collect_VCD_and_ROA_data(cwd, dir_list, dir_parameters):
             intensity = []
             num_imaginary_frequencies = None
             os.chdir(f"{dir_list[a]}/cmpd_{conformer_count}")
+
+            # File parsing error flag.
+            fpe = False
 
             # Data collection for ROA and VCD.
             with open("output.log", "r") as file_out:
@@ -52,12 +57,24 @@ def collect_VCD_and_ROA_data(cwd, dir_list, dir_parameters):
                         if split_line[0] == "NAtoms=":
                             natom = int(split_line[1])
                         if split_line[0] == "Frequencies":
+                            if len(split_line) != 5:
+                                print(f"File Parsing Error: Snapshot {conformer_count} being removed due to frequency.")
+                                fpe = True
+                                break
                             frequency.extend(map(float, split_line[2:]))
                         if dir_parameters[a][0] == "VCD":
                             if split_line[0] == "Rot.":
+                                if len(split_line) != 6:
+                                    print(f"File Parsing Error: Snapshot {conformer_count} being removed due to rotatory strength.")
+                                    fpe = True
+                                    break
                                 intensity.extend(map(float, split_line[3:]))
                         elif dir_parameters[a][0] == "ROA":
                             if split_line[0] == "CID3":
+                                if len(split_line) != 6:
+                                    print(f"File Parsing Error: Snapshot {conformer_count} being removed due to circular intenisty difference.")
+                                    fpe = True
+                                    break
                                 intensity.extend(map(float, split_line[3:]))
                         if num_imaginary_frequencies == None:
                             num_imaginary_frequencies = 0
@@ -69,6 +86,13 @@ def collect_VCD_and_ROA_data(cwd, dir_list, dir_parameters):
                     intensity = [i * 10**-44 for i in intensity]
                 if dir_parameters[a][0] == "ROA":
                     intensity = [i * 10**4 for i in intensity]
+
+            # Breaking iteration for file parsing error.
+            if fpe:
+                test_fpe.append(conformer_count)
+                print(f"File parsing error found. Removing snapshot {conformer_count}.")
+                conformer_count += 1
+                continue
 
             # Calculate total number of vibrations for nonlinear molecules.
             num_vibrations = 3 * natom - 6
@@ -104,8 +128,9 @@ def collect_VCD_and_ROA_data(cwd, dir_list, dir_parameters):
         dir_frequencies.append(test_frequencies)
         dir_intensities.append(test_intensities)
         dir_nbf.append(nbf)
+        dir_fpe.append(test_fpe)
 
-    return dir_frequencies, dir_intensities, dir_nbf
+    return dir_frequencies, dir_intensities, dir_nbf, dir_fpe
 
 
 
@@ -180,7 +205,7 @@ def collect_OptRot_data(cwd, dir_list, dir_parameters):
 
 
 
-def generate_VCD_and_ROA_spectra(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities, min_frequency, max_frequency):
+def generate_VCD_and_ROA_spectra(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities, min_frequency, max_frequency, dir_fpe):
     """
     Generates the spectrum for each test. The spectral generation uses a simple averaging algorithm to weight the snapshots.
     """
@@ -221,7 +246,7 @@ def generate_VCD_and_ROA_spectra(fwhm, number_of_points, dir_list, dir_parameter
         # Normalize the intensity values based on the number of snapshots.
         normalized_spec_intensities = np.zeros_like(spec_intensities)
         for j in range(len(spec_intensities)):
-            normalized_spec_intensities[j] = spec_intensities[j]*(1/int(dir_parameters[a][5]))
+            normalized_spec_intensities[j] = spec_intensities[j]*(1/int(dir_parameters[a][5] - len(dir_fpe[a])))
 
         # Fitting data to line shapes.
         # See equations 1.16 and 3.51 "Vibrational Optical Activity Principles and Applications" by Laurence Nafie for details.
@@ -252,7 +277,7 @@ def generate_VCD_and_ROA_spectra(fwhm, number_of_points, dir_list, dir_parameter
 
 
 
-def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities, min_frequency, max_frequency, snapshot_list):
+def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, dir_parameters, dir_frequencies, dir_intensities, min_frequency, max_frequency, snapshot_list, dir_fpe):
     """
     Generates the spectrum for each test assuming only one snapshot test has been performed and only VCD and ROA are being explored (not optical rotation). 
     This function returns the running average of data for the chosen interval of snapshots through the total snapshot number. 
@@ -267,6 +292,8 @@ def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, d
     dir_snapshot_axis = []
     dir_integration_axis = []
 
+    # Store original snapshot list.
+    snapshot_list_original = snapshot_list.copy()
 
     for a in range(len(dir_list)):
         print("Generating spectral data for test", a,".")
@@ -277,6 +304,16 @@ def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, d
         max_intensity.append([])
         dir_snapshot_axis.append([])
         dir_integration_axis.append([])
+
+        # Adjusting snapshot number for indexing and normalization associated with file parsing errors.
+        snapshot_list = []
+        for p in snapshot_list_original:
+            for q in dir_fpe[a]:
+                if q <= p:
+                    snapshot_list.append(p-1)
+                else:
+                    snapshot_list.append(p)
+        print(snapshot_list)
 
         for x in range(0,len(snapshot_list)):
             print("Calculating spectrum for",snapshot_list[x],"snapshots.")
