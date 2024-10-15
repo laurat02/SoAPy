@@ -246,7 +246,7 @@ def generate_VCD_and_ROA_spectra(fwhm, number_of_points, dir_list, dir_parameter
         # Normalize the intensity values based on the number of snapshots.
         normalized_spec_intensities = np.zeros_like(spec_intensities)
         for j in range(len(spec_intensities)):
-            normalized_spec_intensities[j] = spec_intensities[j]*(1/int(dir_parameters[a][5] - len(dir_fpe[a])))
+            normalized_spec_intensities[j] = spec_intensities[j]*(1/(int(dir_parameters[a][5]) - int(len(dir_fpe[a]))))
 
         # Fitting data to line shapes.
         # See equations 1.16 and 3.51 "Vibrational Optical Activity Principles and Applications" by Laurence Nafie for details.
