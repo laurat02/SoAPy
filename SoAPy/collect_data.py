@@ -313,6 +313,10 @@ def generate_VCD_and_ROA_convergence_spectra(fwhm, number_of_points, dir_list, d
                     snapshot_list.append(p-1)
                 else:
                     snapshot_list.append(p)
+
+        if len(dir_fpe[a]) == 0:
+            snapshot_list = snapshot_list_original.copy()
+
         print(snapshot_list)
 
         for x in range(0,len(snapshot_list)):
